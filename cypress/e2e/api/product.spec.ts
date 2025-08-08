@@ -1,5 +1,23 @@
 import { Product, ProductAPI, ProductListResponse } from '../../support/api';
 
+const isSortedAsc = (arr: string[]): boolean => {
+  for (let i = 1; i < arr.length; i++) {
+    if (arr[i - 1].localeCompare(arr[i]) > 0) {
+      return false;
+    }
+  }
+  return true;
+};
+
+const isSortedDesc = (arr: string[]): boolean => {
+  for (let i = 1; i < arr.length; i++) {
+    if (arr[i - 1].localeCompare(arr[i]) < 0) {
+      return false;
+    }
+  }
+  return true;
+};
+
 describe('Product API @api', () => {
 
   // 1) FORMAT test (contract)
@@ -145,11 +163,33 @@ describe('Product API @api', () => {
   it('GET /products?skip=9999 - behavior: returns empty array if skip is greater than total', () => {
     const skip = 9999; // Assumption: skip 9999 is greater than total products
     ProductAPI.list({ skip }).then((res) => {
-    expect(res.status).to.equal(200);
-    expect(res.body.products).to.be.an('array').and.to.be.empty;
-    expect(res.body.skip).to.equal(skip);
-    expect(res.body.total).to.be.lessThan(skip);
+      expect(res.status).to.equal(200);
+      expect(res.body.products).to.be.an('array').and.to.be.empty;
+      expect(res.body.skip).to.equal(skip);
+      expect(res.body.total).to.be.lessThan(skip);
+    });
   });
-});
+
+  // 14) BEHAVIOR test
+  /* IMPORTANT: This test is deliberately failing to highlight a bug in the API's sorting functionality.
+     The API is returning an unsorted list, despite the `sortBy` and `order` parameters. */
+  it('GET /products?sortBy=title&order=asc - behavior: returns sorted titles in ascending order', () => {
+    // Assumption: the API supports ascending sorting by title
+    ProductAPI.list({ limit: 30, sortBy: 'title', order: 'asc' }).then((res) => {
+      const titles = res.body.products.map((p: Product) => p.title);
+      expect(isSortedAsc(titles)).to.equal(true);
+    });
+  });
+
+  // 15) BEHAVIOR test
+  /* IMPORTANT: This test is deliberately failing to highlight a bug in the API's sorting functionality.
+     The API is returning an unsorted list, despite the `sortBy` and `order` parameters. */
+  it('GET /products?sortBy=title&order=desc - behavior: returns sorted titles in descending order', () => {
+    // Assumption: the API supports descending sorting by title
+    ProductAPI.list({ limit: 30, sortBy: 'title', order: 'desc' }).then((res) => {
+      const titles = res.body.products.map((p: Product) => p.title);
+      expect(isSortedDesc(titles)).to.equal(true);
+    });
+  });
 
 });
