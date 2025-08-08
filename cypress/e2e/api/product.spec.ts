@@ -100,4 +100,56 @@ describe('Product API @api', () => {
     });
   });
 
+  // 9) FORMAT test
+  it('GET /products?limit&skip - format: envelope stays consistent', () => {
+    ProductAPI.list({ limit: 7, skip: 7 }).then((res) => {
+      expect(res.status).to.equal(200);
+      expect(res.body.limit).to.equal(7);
+      expect(res.body.skip).to.equal(7);
+      expect(res.body.products).to.have.length(7);
+    });
+  });
+
+  // 10) BEHAVIOR test
+  it('GET /products?limit&skip - behavior: respects skip', () => {
+    // get first product
+    ProductAPI.list({ limit: 1 }).then((res) => {
+      const firstProductId = res.body.products[0].id;
+      // get second product with skip
+      ProductAPI.list({ limit: 1, skip: 1 }).then((res2) => {
+        const secondProductId = res2.body.products[0].id;
+        // second product should not be the same as first
+        expect(secondProductId).to.not.equal(firstProductId);
+      });
+    });
+  });
+
+  // 11) BEHAVIOR test
+  it('GET /products?limit=0 - behavior: returns all items', () => {
+    ProductAPI.list({ limit: 0 }).then((res) => {
+      expect(res.status).to.equal(200);
+      expect(res.body.products.length).to.equal(res.body.total);
+    });
+  });
+
+  // 12) BEHAVIOR test
+  it('GET /products?limit=9999 - behavior: respects max limit', () => {
+    const limit = 9999; // Assumption: limit 9999 is greater than total products
+    ProductAPI.list({ limit }).then((res) => {
+      expect(res.status).to.equal(200);
+      expect(res.body.products.length).to.equal(res.body.total);
+    });
+  });
+
+  // 13) BEHAVIOR test
+  it('GET /products?skip=9999 - behavior: returns empty array if skip is greater than total', () => {
+    const skip = 9999; // Assumption: skip 9999 is greater than total products
+    ProductAPI.list({ skip }).then((res) => {
+    expect(res.status).to.equal(200);
+    expect(res.body.products).to.be.an('array').and.to.be.empty;
+    expect(res.body.skip).to.equal(skip);
+    expect(res.body.total).to.be.lessThan(skip);
+  });
+});
+
 });
