@@ -18,7 +18,7 @@ A clean and efficient test suite for the DummyJSON Product API, built with Cypre
 Clone the repository and install dependencies:
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/Speelcraft/deep-origin-cypress-api.git
 cd deeporigin-api-tests
 npm install
 ```
