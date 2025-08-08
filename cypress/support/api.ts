@@ -74,7 +74,7 @@ export class ProductAPI {
     return cy.request<ProductListResponse>({
       method: 'GET',
       url: '/products/search',
-      qs: {q}
+      qs: { q }
     });
   }
 
@@ -85,4 +85,40 @@ export class ProductAPI {
     });
   }
 
+  static listCategorySlugs() {
+    return cy.request<string[]>({
+      method: 'GET',
+      url: '/products/category-list',
+    });
+  }
+
+  static getByCategory(slug: string) {
+    return cy.request<ProductListResponse>({
+      method: 'GET',
+      url: `/products/category/${slug}`,
+    });
+  }
+
+  static addProduct(body: Partial<Omit<Product, 'id'>>) {
+    return cy.request<Product>({
+      method: 'POST',
+      url: '/products/add',
+      body
+    });
+  }
+
+  static updateProduct(id: number, body: Partial<Omit<Product, 'id'>>) {
+    return cy.request<Product>({
+      method: 'PUT',
+      url: `/products/${id}`,
+      body
+    });
+  }
+
+  static deleteProduct(id: number) {
+    return cy.request<Product & { isDeleted?: boolean; deletedOn?: string }>({
+      method: 'DELETE',
+      url: `/products/${id}`
+    });
+  }
 }

@@ -208,4 +208,88 @@ describe('Product API @api', () => {
       });
   });
 
+  // 17) BEHAVIOR test
+  it('GET /products/category-list - format: array of strings', () => {
+    ProductAPI.listCategorySlugs().then((res) => {
+      expect(res.status).to.equal(200);
+      expect(res.body).to.be.an('array').and.not.be.empty;
+
+      res.body.forEach((slug: string) => {
+        expect(slug).to.be.a('string');
+      });
+
+      // Sanity test - Assumption: 'smartphones' is a valid category
+      expect(res.body).to.include.members(['smartphones']);
+    });
+  });
+
+  // 18) FORMAT test
+  it('GET /products/category/:slug - format: should return a list with correct envelope and core fields', () => {
+    const slug = 'smartphones';
+    ProductAPI.getByCategory(slug).then((res) => {
+      expect(res.status).to.equal(200);
+      expect(res.body).to.have.all.keys('products', 'total', 'skip', 'limit');
+      expect(res.body.products).to.be.an('array');
+
+      if (res.body.products.length > 0) {
+        res.body.products.forEach((p: Product) => {
+          expect(p).to.include.keys('id', 'title', 'category', 'price');
+        });
+      }
+    });
+  });
+
+  // 19) BEHAVIOR test
+  it('GET /products/category/:slug - behavior: should return products belonging to the specified category', () => {
+    const slug = 'smartphones';
+    ProductAPI.getByCategory(slug).then((res) => {
+      expect(res.body.products).to.not.be.empty;
+
+      // For each product, we assert that its 'category' field matches the slug
+      res.body.products.forEach((p: Product) => {
+        expect(p.category).to.equal(slug);
+      });
+    });
+  });
+
+  // 20) BEHAVIOR test
+  it('POST /products/add - bahavior: should return a product with a new ID and the submitted fields (simulated)', () => {
+    const creationPayload = { title: 'Deep Origin Pencil', price: 9.99, category: 'test' };
+    ProductAPI.addProduct(creationPayload).then((res) => {
+      expect(res.status).to.equal(201);
+      expect(res.body.id).to.be.a('number');
+      expect(res.body.title).to.equal(creationPayload.title);
+      expect(res.body.category).to.equal(creationPayload.category);
+      expect(res.body.price).to.equal(creationPayload.price);
+      // Assumption: No persistence; not verifying via GET.
+    });
+  });
+
+
+  // 21) BEHAVIOR test
+  it('PUT /products/:id - behavior: returns updated product (simulated)', () => {
+    const idToUpdate = 1; // Using a known id; simulation does not persist
+    const updatedPayload = { title: 'New Galaxy Deep +1', category: 'Updated Category' };
+    ProductAPI.updateProduct(idToUpdate, updatedPayload).then((res) => {
+      expect(res.status).to.equal(200);
+      expect(res.body.id).to.equal(idToUpdate);
+      expect(res.body.title).to.equal(updatedPayload.title);
+      expect(res.body.category).to.equal(updatedPayload.category);
+      // Assumption: No persistence; not verifying via GET.
+    });
+  });
+
+  // 22) BEHAVIOR test
+  it('DELETE /products/:id - behavior: should return the deleted product with `isDeleted` and `deletedOn` fields (simulated)', () => {
+    const idToDelete = 1; // Simulation; safe to use a known id
+    ProductAPI.deleteProduct(idToDelete).then((res) => {
+      expect(res.status).to.equal(200);
+      expect(res.body.id).to.equal(idToDelete);
+      expect(res.body.isDeleted).to.equal(true);
+      expect(res.body.deletedOn).to.be.a('string');
+      expect(res.body.deletedOn).to.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+      // Assumption: No persistence; not verifying via GET.
+    });
+  });
+
 });
