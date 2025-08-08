@@ -1,4 +1,4 @@
-import { Product, ProductAPI, ProductListResponse } from '../../support/api';
+import { Product, ProductAPI, ProductCategory } from '../../support/api';
 
 const isSortedAsc = (arr: string[]): boolean => {
   for (let i = 1; i < arr.length; i++) {
@@ -190,6 +190,22 @@ describe('Product API @api', () => {
       const titles = res.body.products.map((p: Product) => p.title);
       expect(isSortedDesc(titles)).to.equal(true);
     });
+  });
+
+  // 16) FORMAT test
+  it('GET /products/categories - format: array of categories', () => {
+    ProductAPI.listCategories()
+      .then((res) => {
+        expect(res.status).to.equal(200);
+        expect(res.body).to.be.an('array').and.not.be.empty;
+
+        res.body.forEach((c: ProductCategory) => {
+          expect(c).to.have.all.keys('slug', 'name', 'url');
+          expect(c.slug).to.be.a('string');
+          expect(c.name).to.be.a('string');
+          expect(c.url).to.be.a('string');
+        });
+      });
   });
 
 });

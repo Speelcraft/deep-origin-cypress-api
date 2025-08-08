@@ -41,6 +41,12 @@ export interface ProductListResponse {
 
 export type SortOrder = 'asc' | 'desc';
 
+export interface ProductCategory {
+  slug: string;
+  name: string;
+  url: string;
+}
+
 export class ProductAPI {
   static list(params?: {
     limit?: number;
@@ -69,6 +75,13 @@ export class ProductAPI {
       method: 'GET',
       url: '/products/search',
       qs: {q}
+    });
+  }
+
+  static listCategories() {
+    return cy.request<ProductCategory[]>({
+      method: 'GET',
+      url: '/products/categories',
     });
   }
 
