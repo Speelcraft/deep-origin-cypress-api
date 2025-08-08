@@ -19,7 +19,7 @@ Clone the repository and install dependencies:
 
 ```bash
 git clone https://github.com/Speelcraft/deep-origin-cypress-api.git
-cd deeporigin-api-tests
+cd deep-origin-cypress-api
 npm install
 ```
 
